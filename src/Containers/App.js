@@ -1,9 +1,15 @@
 import React from "react";
 
+import AddTodo from "../Components/AddTodo";
+import "./App.css";
+
 function App() {
   return (
-    <div>
-      <p className="text-red-100">hello universe!</p>
+    <div
+      style={{ backgroundImage: 'url("background.jpg")' }}
+      className="bg-fixed bg-center h-screen w-screen"
+    >
+      <AddTodo />
     </div>
   );
 }
