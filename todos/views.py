@@ -9,7 +9,7 @@ from .serializers import TodoSerializer, TodoTypeSerializer, SubTodoSerializer, 
 from .models import Todo, TodoType, SubTodo, TodoItem
 
 
-# only change is_removed property to True and not delete the data from database
+# only changes is_removed property to True and not delete the data from database
 def destroyWithIsRemoved(model, pk):
     model_copy = model.objects.get(pk=pk)
     if model_copy.is_removed:
@@ -44,19 +44,17 @@ class SubTodoViewSet(ModelViewSet):
     def get_queryset(self):
         return SubTodo.objects.filter(todo=self.kwargs['todo_pk'])
 
-    def get_serializer_context(self):
-        return {"todo_id": self.kwargs['todo_pk']}
+    def create(self, request, *args, **kwargs):
+        serializer = SubTodoGroupAddSerializer(data=request.data,
+                                               context={"todo_id": self.kwargs['todo_pk'], "request": self.request})
 
-    def list(self, request, todo_pk):
-        serializer = SubTodoSerializer(self.queryset, many=True)
-        return Response(serializer.data, status=status.HTTP_200_OK)
-
-    def create(self, request):
-        serializer = SubTodoGroupAddSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
-        print(serializer.data)
         serializer.save()
-        return Response(serializer.data, status=status.HTTP_201_CREATED)
+        return Response(status=status.HTTP_201_CREATED)
+
+    def list(self, request, *args, **kwargs):
+        serializer = SubTodoSerializer(self.get_queryset(), many=True)
+        return Response(serializer.data, status=status.HTTP_200_OK)
 
 
 class TodoItemViewSet(ModelViewSet):
