@@ -6,10 +6,10 @@ from . import views
 router = routers.DefaultRouter()
 router.register('todos', views.TodoViewSet)
 router.register('todo-type', views.TodoTypeViewSet)
+router.register('todo-item', views.TodoItemViewSet)
 
 todo_router = routers.NestedDefaultRouter(router, 'todos', lookup='todo')
 todo_router.register('sub-todos', views.SubTodoViewSet, basename='todo-sub')
-
 
 # urlpatterns = [
 #     path('todo/', views.TodoList.as_view()),
