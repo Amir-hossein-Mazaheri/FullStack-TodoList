@@ -33,3 +33,10 @@ class SubTodo(models.Model):
         Todo, on_delete=models.CASCADE, related_name='sub_todo')
     title = models.CharField(max_length=255)
     is_done = models.BooleanField(default=False)
+
+
+class TodoItem(models.Model):
+    todo = models.ForeignKey(Todo, on_delete=models.CASCADE)
+    todo_type = models.ForeignKey(
+        TodoType, on_delete=models.SET_NULL, null=True)
+    sub_todos = models.ManyToManyField(SubTodo)
