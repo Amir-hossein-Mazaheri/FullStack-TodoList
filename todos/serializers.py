@@ -9,15 +9,24 @@ class SubTodoSerializer(serializers.ModelSerializer):
         fields = ['id', 'title', 'is_done']
 
     def create(self, validated_data):
-        todo_id = self.context['todo_id']
-        return SubTodo.objects.create(todo_id=todo_id, **validated_data)
+        print(self.context)
+        return super().create(validated_data)
 
 
 class SubTodoGroupAddSerializer(serializers.ModelSerializer):
     class Meta:
         model = SubTodo
-        fields = ['sub_todo_ids']
-    sub_todo_ids = serializers.ListField()
+        fields = ['sub_todos']
+
+    sub_todos = serializers.ListField()
+
+    def create(self, validated_data):
+        todo_id = self.context['todo_id']
+        todo_instance = Todo.objects.get(pk=int(todo_id))
+        todos_count = len(validated_data['sub_todos'])
+        for sub_todo in validated_data['sub_todos']:
+            todo = SubTodo.objects.create(**sub_todo, todo=todo_instance)
+        return SubTodoSerializer(SubTodo.objects.reverse()[:todos_count], many=True)
 
 
 class TodoSerializer(serializers.ModelSerializer):
