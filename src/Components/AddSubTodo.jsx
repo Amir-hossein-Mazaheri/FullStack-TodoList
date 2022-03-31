@@ -1,4 +1,4 @@
-import React, { useCallback, useState, useMemo } from "react";
+import { useCallback, useState, useMemo } from "react";
 
 import { useDispatch, useSelector } from "react-redux";
 import Swal from "sweetalert2";
