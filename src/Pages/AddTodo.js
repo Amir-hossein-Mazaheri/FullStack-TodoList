@@ -10,13 +10,13 @@ import HelpIcon from "@mui/icons-material/Help";
 import EditIcon from "@mui/icons-material/Edit";
 import Spinner from "../Common/Spinner";
 import axiosInstance from "../Helpers/axiosInstance";
-import SubTodos from "./SubTodos";
-import AddTodoProperties from "./AddTodoProperties";
+import SubTodos from "../Components/SubTodos";
+import AddTodoProperties from "../Components/AddTodoProperties";
 import { RESET_ADD_TODO, SAVE_TODO } from "../Store/entities/addTodo";
 
 const Message = withReactContent(Swal);
 
-function AddTodo() {
+function AddTodoPage() {
   const [isAddingTodo, setIsAddingTodo] = useState(false);
   const [isSavingAll, setIsSavingAll] = useState(false);
   const { todo, todoTypeId, isTodoSaved, generatedTodoId, subTodos } =
@@ -118,75 +118,80 @@ function AddTodo() {
         })
         .finally(() => setIsSavingAll(false));
     },
-    [generatedTodoId, subTodos, todoTypeId]
+    [dispatch, generatedTodoId, subTodos, todoTypeId]
   );
 
   return (
-    <div className="max-w-2xl min-w-fit w-[95%] px-10 py-4 shadow shadow-black/10 mx-auto mt-7 bg-white/10 backdrop-blur-lg rounded-lg">
-      <div className="mb-3 mt-1 flex">
-        <h2 className="text-2xl text-center mx-auto font-bold text-gray-800">
-          Add A Todo
-        </h2>
-        <div>
-          <span>
-            <HelpIcon />
-          </span>
+    <div
+      style={{ backgroundImage: 'url("background.jpg")' }}
+      className="bg-fixed bg-center min-h-screen py-12"
+    >
+      <div className="max-w-2xl min-w-fit w-[95%] px-10 py-4 shadow shadow-black/10 mx-auto bg-white/10 backdrop-blur-lg rounded-lg">
+        <div className="mb-3 mt-1 flex">
+          <h2 className="text-2xl text-center mx-auto font-bold text-gray-800">
+            Add A Todo
+          </h2>
+          <div>
+            <span>
+              <HelpIcon />
+            </span>
+          </div>
         </div>
-      </div>
 
-      <div>
-        <form onSubmit={handleTodoSubmission}>
-          <AddTodoProperties />
+        <div>
+          <form onSubmit={handleTodoSubmission}>
+            <AddTodoProperties />
 
-          <div className="my-7">
-            <SubTodos />
-          </div>
-
-          <div className="mt-12 ml-auto w-fit flex gap-5">
-            <div>
-              {isAddingTodo ? (
-                <div className="px-5 py-2 mt-5 relative w-fit">
-                  <Spinner className="p-2" />
-                </div>
-              ) : !isTodoSaved ? (
-                <Button
-                  onClick={saveTodo}
-                  startIcon={<AddIcon />}
-                  variant="outlined"
-                >
-                  Save Todo
-                </Button>
-              ) : (
-                <Button
-                  onClick={editTodo}
-                  startIcon={<EditIcon />}
-                  variant="outlined"
-                >
-                  Edit Todo
-                </Button>
-              )}
+            <div className="my-7">
+              <SubTodos />
             </div>
-            <div>
-              {isSavingAll ? (
-                <div className="px-5 py-2 mt-5 relative w-fit">
-                  <Spinner className="p-2" />
-                </div>
-              ) : (
-                <Button
-                  type="submit"
-                  startIcon={<SaveIcon />}
-                  color="success"
-                  variant="outlined"
-                >
-                  <span className="font-medium">Save All</span>
-                </Button>
-              )}
+
+            <div className="mt-12 ml-auto w-fit flex gap-5">
+              <div>
+                {isAddingTodo ? (
+                  <div className="px-5 py-2 mt-5 relative w-fit">
+                    <Spinner className="p-2" />
+                  </div>
+                ) : !isTodoSaved ? (
+                  <Button
+                    onClick={saveTodo}
+                    startIcon={<AddIcon />}
+                    variant="outlined"
+                  >
+                    Save Todo
+                  </Button>
+                ) : (
+                  <Button
+                    onClick={editTodo}
+                    startIcon={<EditIcon />}
+                    variant="outlined"
+                  >
+                    Edit Todo
+                  </Button>
+                )}
+              </div>
+              <div>
+                {isSavingAll ? (
+                  <div className="px-5 py-2 mt-5 relative w-fit">
+                    <Spinner className="p-2" />
+                  </div>
+                ) : (
+                  <Button
+                    type="submit"
+                    startIcon={<SaveIcon />}
+                    color="success"
+                    variant="outlined"
+                  >
+                    <span className="font-medium">Save All</span>
+                  </Button>
+                )}
+              </div>
             </div>
-          </div>
-        </form>
+          </form>
+        </div>
       </div>
     </div>
   );
 }
 
-export default AddTodo;
+export default AddTodoPage;
