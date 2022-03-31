@@ -49,7 +49,8 @@ class SubTodoViewSet(ModelViewSet):
 
 
 class TodoItemViewSet(ModelViewSet):
-    queryset = TodoItem.objects.all()
+    queryset = TodoItem.objects.select_related(
+        'todo', 'todo_type').prefetch_related('sub_todos').all()
     serializer_class = TodoItemCreateSerializer
 
     def list(self, request):
