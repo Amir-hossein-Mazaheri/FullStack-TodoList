@@ -1,5 +1,5 @@
 import { Autocomplete, TextField } from "@mui/material";
-import DateTimePicker from "@mui/lab/DateTimePicker";
+import DateTimePicker from "@mui/lab/MobileDatePicker";
 import useSWR from "swr";
 import { SET_TODO_PROPERTY, SET_TODO_TYPE } from "../Store/entities/addTodo";
 import { useDispatch, useSelector } from "react-redux";
