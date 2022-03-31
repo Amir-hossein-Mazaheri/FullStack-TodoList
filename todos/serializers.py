@@ -8,30 +8,19 @@ class SubTodoSerializer(serializers.ModelSerializer):
         model = SubTodo
         fields = ['id', 'title', 'is_done']
 
-
-class SubTodoGroupAddSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = SubTodo
-        fields = ['sub_todos']
-
-    sub_todos = serializers.ListField(write_only=True)
-
     def create(self, validated_data):
         todo_id = self.context['todo_id']
-        todo_instance = Todo.objects.get(pk=int(todo_id))
-        todos_count = len(validated_data['sub_todos'])
-        for sub_todo in validated_data['sub_todos']:
-            SubTodo.objects.create(**sub_todo, todo=todo_instance)
-        return SubTodo.objects.all().reverse()[:todos_count]
+        related_todo = Todo.objects.get(pk=todo_id)
+        return SubTodo.objects.create(**validated_data, todo=related_todo)
 
 
 class TodoSerializer(serializers.ModelSerializer):
-    sub_todos = serializers.IntegerField(read_only=True)
+    is_removed = serializers.BooleanField(write_only=True)
 
     class Meta:
         model = Todo
         fields = ['id', 'title', 'description', 'created_at',
-                  'deadline', 'is_finished_before_deadline', 'status', 'is_removed', 'todo_type', 'sub_todos']
+                  'deadline', 'is_finished_before_deadline', 'status', 'is_removed', 'todo_type']
 
 
 class TodoTypeSerializer(serializers.ModelSerializer):

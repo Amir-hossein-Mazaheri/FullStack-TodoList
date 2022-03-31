@@ -4,7 +4,7 @@ from rest_framework.response import Response
 from rest_framework import status
 
 from .serializers import TodoSerializer, TodoTypeSerializer, SubTodoSerializer, \
-    TodoItemCreateSerializer, TodoItemListSerializer, SubTodoGroupAddSerializer
+    TodoItemCreateSerializer, TodoItemListSerializer
 
 from .models import Todo, TodoType, SubTodo, TodoItem
 
@@ -39,22 +39,13 @@ class TodoTypeViewSet(ModelViewSet):
 
 
 class SubTodoViewSet(ModelViewSet):
-    serializer_class = SubTodoGroupAddSerializer
+    serializer_class = SubTodoSerializer
 
     def get_queryset(self):
         return SubTodo.objects.filter(todo=self.kwargs['todo_pk'])
 
-    def create(self, request, *args, **kwargs):
-        serializer = SubTodoGroupAddSerializer(data=request.data,
-                                               context={"todo_id": self.kwargs['todo_pk'], "request": self.request})
-
-        serializer.is_valid(raise_exception=True)
-        serializer.save()
-        return Response(status=status.HTTP_201_CREATED)
-
-    def list(self, request, *args, **kwargs):
-        serializer = SubTodoSerializer(self.get_queryset(), many=True)
-        return Response(serializer.data, status=status.HTTP_200_OK)
+    def get_serializer_context(self):
+        return {"todo_id": self.kwargs['todo_pk'], "request": self.request}
 
 
 class TodoItemViewSet(ModelViewSet):
@@ -67,10 +58,9 @@ class TodoItemViewSet(ModelViewSet):
 
     def create(self, request):
         serializer = TodoItemCreateSerializer(data=request.data)
-        if serializer.is_valid():
-            serializer.save()
-            return Response(serializer.data, status=status.HTTP_201_CREATED)
-        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+        serializer.is_valid(raise_exception=True)
+        serializer.save()
+        return Response(serializer.data, status=status.HTTP_201_CREATED)
 
     def retrieve(self, request, *args, **kwargs):
         queryset = TodoItem.objects.get(pk=kwargs['pk'])
