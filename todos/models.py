@@ -6,6 +6,7 @@ from django.db import models
 class TodoType(models.Model):
     label = models.CharField(max_length=255)
     is_removed = models.BooleanField(default=False)
+    is_general = models.BooleanField(default=False)
     user = models.ForeignKey(settings.AUTH_USER_MODEL,
                              on_delete=models.SET_NULL, null=True)
 
