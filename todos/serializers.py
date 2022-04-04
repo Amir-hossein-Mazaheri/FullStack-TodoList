@@ -33,7 +33,7 @@ class TodoTypeSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = TodoType
-        fields = ['id', 'label', 'is_removed']
+        fields = ['id', 'label', 'is_general', 'is_removed']
 
     def create(self, validated_data):
         user = self.context['user']
