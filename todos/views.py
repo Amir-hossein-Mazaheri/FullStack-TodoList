@@ -1,9 +1,11 @@
+from asyncio.windows_events import NULL
+from django.db.models import Q
 from rest_framework.viewsets import ModelViewSet
 from rest_framework.response import Response
 from rest_framework import status
+from rest_framework.permissions import IsAuthenticated
 
 from .serializers import TodoSerializer, TodoTypeSerializer, SubTodoSerializer
-
 from .models import Todo, TodoType, SubTodo
 
 
@@ -20,17 +22,35 @@ def destroyWithIsRemoved(model, pk):
 
 
 class TodoViewSet(ModelViewSet):
-    queryset = Todo.objects.filter(is_removed=False).all()
     serializer_class = TodoSerializer
+    permission_classes = [IsAuthenticated]
+
+    def get_queryset(self):
+        return Todo.objects.filter(is_removed=False, user=self.request.user).all()
+
+    # sends user object to serializer
+    def get_serializer_context(self):
+        inherited_return_dic = super().get_serializer_context()
+        return {**inherited_return_dic, "user": self.request.user}
+
+    def list(self, request, *args, **kwargs):
+        return super().list(request, *args, **kwargs)
 
     def destroy(self, request, pk):
         return destroyWithIsRemoved(Todo, pk)
 
 
 class TodoTypeViewSet(ModelViewSet):
-    queryset = TodoType.objects.filter(
-        is_removed=False).all()
     serializer_class = TodoTypeSerializer
+    permission_classes = [IsAuthenticated]
+
+    def get_queryset(self):
+        return TodoType.objects.filter(is_removed=False).\
+            filter(Q(user=None) | Q(user=self.request.user)).all()
+
+    def get_serializer_context(self):
+        inherited_return_dic = super().get_serializer_context()
+        return {**inherited_return_dic, "user": self.request.user}
 
     def destroy(self, request, pk):
         return destroyWithIsRemoved(TodoType, pk)
@@ -38,6 +58,7 @@ class TodoTypeViewSet(ModelViewSet):
 
 class SubTodoViewSet(ModelViewSet):
     serializer_class = SubTodoSerializer
+    permission_classes = [IsAuthenticated]
 
     def get_queryset(self):
         return SubTodo.objects.filter(todo=self.kwargs['todo_pk'])

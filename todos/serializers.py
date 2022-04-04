@@ -23,10 +23,18 @@ class TodoSerializer(serializers.ModelSerializer):
         fields = ['id', 'title', 'description', 'created_at',
                   'deadline', 'is_finished_before_deadline', 'status', 'is_removed', 'sub_todos', 'todo_type']
 
+    def create(self, validated_data):
+        user = self.context['user']
+        return Todo.objects.create(**validated_data, user=user)
+
 
 class TodoTypeSerializer(serializers.ModelSerializer):
+    is_removed = serializers.BooleanField(write_only=True)
+
     class Meta:
         model = TodoType
         fields = ['id', 'label', 'is_removed']
 
-    is_removed = serializers.BooleanField(write_only=True)
+    def create(self, validated_data):
+        user = self.context['user']
+        return TodoType.objects.create(**validated_data, user=user)
