@@ -1,6 +1,6 @@
 from rest_framework import serializers
 
-from .models import Todo, TodoType, SubTodo, TodoItem
+from .models import Todo, TodoType, SubTodo
 
 
 class SubTodoSerializer(serializers.ModelSerializer):
@@ -16,11 +16,12 @@ class SubTodoSerializer(serializers.ModelSerializer):
 
 class TodoSerializer(serializers.ModelSerializer):
     is_removed = serializers.BooleanField(write_only=True)
+    sub_todos = SubTodoSerializer(many=True, read_only=True)
 
     class Meta:
         model = Todo
         fields = ['id', 'title', 'description', 'created_at',
-                  'deadline', 'is_finished_before_deadline', 'status', 'is_removed', 'todo_type']
+                  'deadline', 'is_finished_before_deadline', 'status', 'is_removed', 'sub_todos', 'todo_type']
 
 
 class TodoTypeSerializer(serializers.ModelSerializer):
@@ -29,19 +30,3 @@ class TodoTypeSerializer(serializers.ModelSerializer):
         fields = ['id', 'label', 'is_removed']
 
     is_removed = serializers.BooleanField(write_only=True)
-
-
-class TodoItemListSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = TodoItem
-        fields = ['id', 'todo', 'sub_todos', 'todo_type']
-
-    todo = TodoSerializer(read_only=True)
-    todo_type = TodoTypeSerializer(read_only=True)
-    sub_todos = SubTodoSerializer(many=True, read_only=True)
-
-
-class TodoItemCreateSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = TodoItem
-        fields = ['id', 'todo', 'sub_todos', 'todo_type']

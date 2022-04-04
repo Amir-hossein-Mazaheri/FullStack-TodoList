@@ -10,6 +10,8 @@ mysqlclient = "*"
 django-debug-toolbar = "*"
 drf-nested-routers = "*"
 django-cors-headers = "*"
+djoser = "*"
+djangorestframework-simplejwt = "*"
 
 [dev-packages]
 autopep8 = "*"

@@ -1,3 +1,8 @@
 from django.contrib import admin
 
-# Register your models here.
+from .models import TodoType
+
+
+@admin.register(TodoType)
+class TodoTypeAdmin(admin.ModelAdmin):
+    pass

@@ -1,9 +1,13 @@
+from uuid import uuid4
+from django.conf import settings
 from django.db import models
 
 
 class TodoType(models.Model):
     label = models.CharField(max_length=255)
     is_removed = models.BooleanField(default=False)
+    user = models.ForeignKey(settings.AUTH_USER_MODEL,
+                             on_delete=models.SET_NULL, null=True)
 
     def __str__(self):
         return self.label
@@ -26,17 +30,12 @@ class Todo(models.Model):
     status = models.CharField(max_length=1, choices=status_choices)
     is_removed = models.BooleanField(default=False)
     todo_type = models.ForeignKey(TodoType, on_delete=models.PROTECT)
+    user = models.ForeignKey(settings.AUTH_USER_MODEL,
+                             on_delete=models.CASCADE)
 
 
 class SubTodo(models.Model):
     todo = models.ForeignKey(
-        Todo, on_delete=models.CASCADE, related_name='sub_todo')
+        Todo, on_delete=models.CASCADE, related_name='sub_todos')
     title = models.CharField(max_length=255)
     is_done = models.BooleanField(default=False)
-
-
-class TodoItem(models.Model):
-    todo = models.ForeignKey(Todo, on_delete=models.CASCADE)
-    todo_type = models.ForeignKey(
-        TodoType, on_delete=models.SET_NULL, null=True)
-    sub_todos = models.ManyToManyField(SubTodo)
