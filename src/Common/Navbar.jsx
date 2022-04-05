@@ -1,4 +1,7 @@
-import { useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
+
+import useSWR from "swr";
+import { Link, NavLink, useNavigate } from "react-router-dom";
 import AppBar from "@mui/material/AppBar";
 import Box from "@mui/material/Box";
 import Toolbar from "@mui/material/Toolbar";
@@ -11,31 +14,100 @@ import Avatar from "@mui/material/Avatar";
 import Button from "@mui/material/Button";
 import Tooltip from "@mui/material/Tooltip";
 import MenuItem from "@mui/material/MenuItem";
+import axiosAuth from "../Helpers/axiosAuth";
+import Auth from "../Helpers/Auth";
+import { useDispatch } from "react-redux";
+import { SET_USER_DETAIL } from "../Store/entities/user";
 
-const pages = ["Add Todo", "All Todos", "Finished Todos"];
-const settings = ["Profile", "Logout"];
+const pages = [
+  {
+    title: "Add Todo",
+    path: `/add-todo`,
+  },
+  {
+    title: "Add Todo Type",
+    path: `/add-todo-type`,
+  },
+  {
+    title: "All Todos",
+    path: `/all-todos`,
+  },
+  {
+    title: "Finished Todos",
+    path: `/finished-todos`,
+  },
+];
 
-const Navbar = () => {
+const title = (
+  <Link to="/">
+    <span>Premium Todo List</span>
+  </Link>
+);
+
+function Navbar() {
   const [anchorElNav, setAnchorElNav] = useState(null);
   const [anchorElUser, setAnchorElUser] = useState(null);
 
-  const handleOpenNavMenu = (event) => {
-    setAnchorElNav(event.currentTarget);
-  };
-  const handleOpenUserMenu = (event) => {
-    setAnchorElUser(event.currentTarget);
-  };
+  const navigate = useNavigate();
 
-  const handleCloseNavMenu = () => {
-    setAnchorElNav(null);
-  };
+  useEffect(() => {
+    const isLoggedIn = Auth.isLoggedIn();
+    const isRefreshExpired = Auth.isTokenExpired(Auth.getToken("refresh"));
+    if (!isLoggedIn || isRefreshExpired) {
+      navigate("/sign-in");
+      return;
+    }
+  }, [navigate]);
 
-  const handleCloseUserMenu = () => {
-    setAnchorElUser(null);
-  };
+  const logout = useCallback(() => {
+    Auth.logout();
+    navigate("/sign-in");
+  }, [navigate]);
+
+  const settings = useMemo(() => {
+    return [
+      {
+        title: "Profile",
+        func: undefined,
+      },
+      {
+        title: "Logout",
+        func: logout,
+      },
+    ];
+  }, [logout]);
+
+  const dispatch = useDispatch();
+
+  const profileFetcher = useCallback(
+    (url) =>
+      axiosAuth(url, {
+        headers: {
+          Authorization: "Auth " + Auth.getToken("access"),
+        },
+      })
+        .then((res) => {
+          console.log(res);
+          dispatch(SET_USER_DETAIL({ details: res.data }));
+          return res.data;
+        })
+        .catch((err) => console.log(err.response)),
+    [dispatch]
+  );
+
+  const { data: userData } = useSWR("/users/me/", profileFetcher);
+
+  if (!userData) {
+    return <></>;
+  }
 
   return (
-    <AppBar sx={{ top: 0 }} position="static">
+    <AppBar
+      color="primary"
+      className="bg-red-500"
+      sx={{ top: 0 }}
+      position="static"
+    >
       <Container maxWidth="xl">
         <Toolbar disableGutters>
           <Typography
@@ -44,7 +116,7 @@ const Navbar = () => {
             component="div"
             sx={{ mr: 2, display: { xs: "none", md: "flex" } }}
           >
-            Premium Todo List
+            {title}
           </Typography>
 
           <Box sx={{ flexGrow: 1, display: { xs: "flex", md: "none" } }}>
@@ -53,7 +125,7 @@ const Navbar = () => {
               aria-label="account of current user"
               aria-controls="menu-appbar"
               aria-haspopup="true"
-              onClick={handleOpenNavMenu}
+              onClick={(event) => setAnchorElNav(event.currentTarget)}
               color="inherit"
             >
               <MenuIcon />
@@ -71,14 +143,16 @@ const Navbar = () => {
                 horizontal: "left",
               }}
               open={Boolean(anchorElNav)}
-              onClose={handleCloseNavMenu}
+              onClose={() => setAnchorElNav(null)}
               sx={{
                 display: { xs: "block", md: "none" },
               }}
             >
-              {pages.map((page) => (
-                <MenuItem key={page} onClick={handleCloseNavMenu}>
-                  <Typography textAlign="center">{page}</Typography>
+              {pages.map(({ title, path }) => (
+                <MenuItem key={title} onClick={() => setAnchorElNav(null)}>
+                  <NavLink to={path}>
+                    <Typography textAlign="center">{title}</Typography>
+                  </NavLink>
                 </MenuItem>
               ))}
             </Menu>
@@ -89,24 +163,30 @@ const Navbar = () => {
             component="div"
             sx={{ flexGrow: 1, display: { xs: "flex", md: "none" } }}
           >
-            Premium Todo List
+            {title}
           </Typography>
           <Box sx={{ flexGrow: 1, display: { xs: "none", md: "flex" } }}>
-            {pages.map((page) => (
+            {pages.map(({ title, path }) => (
               <Button
-                key={page}
-                onClick={handleCloseNavMenu}
+                key={title}
+                onClick={() => setAnchorElNav(null)}
                 sx={{ my: 2, color: "white", display: "block" }}
               >
-                {page}
+                <NavLink to={path}>{title}</NavLink>
               </Button>
             ))}
           </Box>
 
           <Box sx={{ flexGrow: 0 }}>
             <Tooltip title="Open settings">
-              <IconButton onClick={handleOpenUserMenu} sx={{ p: 0 }}>
-                <Avatar alt="Remy Sharp" src="/static/images/avatar/2.jpg" />
+              <IconButton
+                onClick={(event) => setAnchorElUser(event.currentTarget)}
+                sx={{ p: 0 }}
+              >
+                <Avatar
+                  alt={userData.first_name + " " + userData.last_name}
+                  src="/static/images/avatar/2.jpg"
+                />
               </IconButton>
             </Tooltip>
             <Menu
@@ -123,11 +203,17 @@ const Navbar = () => {
                 horizontal: "right",
               }}
               open={Boolean(anchorElUser)}
-              onClose={handleCloseUserMenu}
+              onClose={() => setAnchorElUser(null)}
             >
-              {settings.map((setting) => (
-                <MenuItem key={setting} onClick={handleCloseUserMenu}>
-                  <Typography textAlign="center">{setting}</Typography>
+              {settings.map(({ title, func }) => (
+                <MenuItem
+                  key={title}
+                  onClick={() => {
+                    setAnchorElUser(null);
+                    func();
+                  }}
+                >
+                  <Typography textAlign="center">{title}</Typography>
                 </MenuItem>
               ))}
             </Menu>
@@ -136,5 +222,6 @@ const Navbar = () => {
       </Container>
     </AppBar>
   );
-};
+}
+
 export default Navbar;
