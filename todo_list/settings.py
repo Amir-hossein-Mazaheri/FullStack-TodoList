@@ -152,6 +152,8 @@ DEBUG_TOOLBAR_CONFIG = {
 
 CORS_ALLOWED_ORIGINS = [
     "http://localhost:5000",
+    "http://localhost:3000",
+    "http://localhost:8080",
 ]
 
 

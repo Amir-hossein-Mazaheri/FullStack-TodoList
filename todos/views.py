@@ -1,4 +1,3 @@
-from asyncio.windows_events import NULL
 from django.db.models import Q
 from rest_framework.viewsets import ModelViewSet
 from rest_framework.response import Response
@@ -43,7 +42,7 @@ class TodoViewSet(ModelViewSet):
 class TodoTypeViewSet(ModelViewSet):
     serializer_class = TodoTypeSerializer
     permission_classes = [IsAuthenticated]
-    
+
     def get_queryset(self):
         return TodoType.objects.filter(is_removed=False).\
             filter(Q(user=None) | Q(user=self.request.user)).all()
