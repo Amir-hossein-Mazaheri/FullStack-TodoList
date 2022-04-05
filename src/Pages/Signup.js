@@ -17,27 +17,28 @@ import VisibilityOff from "@mui/icons-material/VisibilityOff";
 import AuthLayout from "../Layouts/AuthLayout";
 import axiosAuth from "../Helpers/axiosAuth";
 import Message from "../Helpers/message";
+import { useNavigate } from "react-router";
 
-const signinSchema = Yup.object()
-  .shape({
-    username: Yup.string().required("username is required"),
-    email: Yup.string().email().required("email is required"),
-    firstname: Yup.string().required("firstname is required"),
-    lastname: Yup.string().required("lastname is required"),
-    password: Yup.string()
-      .min(8, "password must contain at least 8 characters.")
-      .required("password is required"),
-    repeatPassword: Yup.string()
-      .required("repeat password is required")
-      .oneOf([Yup.ref("password")], "Passwords does not match"),
-  })
-  .required();
+const signinSchema = Yup.object().shape({
+  username: Yup.string().required("username is required"),
+  email: Yup.string().email().required("email is required"),
+  firstname: Yup.string().required("firstname is required"),
+  lastname: Yup.string().required("lastname is required"),
+  password: Yup.string()
+    .min(8, "password must contain at least 8 characters.")
+    .required("password is required"),
+  repeatPassword: Yup.string()
+    .required("repeat password is required")
+    .oneOf([Yup.ref("password")], "Passwords does not match"),
+});
 
 function SignUpPage() {
   const [isSigningUp, setIsSigningUp] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
   const [password, setPassword] = useState("");
   const [repeatPassword, setRepeatPassword] = useState("");
+
+  const navigate = useNavigate();
 
   const {
     handleSubmit,
@@ -61,9 +62,10 @@ function SignUpPage() {
         .then((res) => {
           console.log(res);
           Message.fire({
-            titleText: "Signed In Successfully",
+            titleText: "Signed Up Successfully",
             icon: "success",
           });
+          navigate("/sign-in");
         })
         .catch((err) => {
           console.log(err);
@@ -84,7 +86,7 @@ function SignUpPage() {
         })
         .finally(() => setIsSigningUp(false));
     },
-    []
+    [navigate]
   );
 
   return (
