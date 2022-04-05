@@ -1,8 +1,6 @@
 import { useCallback, useState, useMemo } from "react";
 
 import { useDispatch, useSelector } from "react-redux";
-import Swal from "sweetalert2";
-import withReactContent from "sweetalert2-react-content";
 import TextField from "@mui/material/TextField";
 import Button from "@mui/material/Button";
 import Progress from "@mui/material/CircularProgress";
@@ -10,26 +8,12 @@ import DeleteIcon from "@mui/icons-material/Delete";
 import SaveIcon from "@mui/icons-material/Save";
 import EditIcon from "@mui/icons-material/Edit";
 import axiosInstance from "../Helpers/axiosInstance";
+import Message, { Alert } from "../Helpers/message";
 import {
   DELETE_SUB_TODO,
   SAVE_SUB_TODO,
   SET_SUB_TODO,
 } from "../Store/entities/addTodo";
-
-const Alert = withReactContent(Swal);
-
-const Message = Alert.mixin({
-  toast: true,
-  position: "top-right",
-  width: "35rem",
-  showConfirmButton: false,
-  timer: 3500,
-  timerProgressBar: true,
-  didOpen: (toast) => {
-    toast.addEventListener("mouseenter", Swal.stopTimer);
-    toast.addEventListener("mouseleave", Swal.resumeTimer);
-  },
-});
 
 function AddSubTodo({ subTodoId, value }) {
   const [isSavingSubTodo, setIsSavingSubTodo] = useState(false);
