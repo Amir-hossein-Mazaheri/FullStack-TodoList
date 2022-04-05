@@ -1,23 +1,31 @@
-import React from "react";
-
 import { Provider } from "react-redux";
 import LocalizationProvider from "@mui/lab/LocalizationProvider";
 import DateAdapter from "@mui/lab/AdapterMoment";
+import { BrowserRouter } from "react-router-dom";
 import "moment/locale/en-ca";
+import moment from "moment";
 import store from "../Store/configStore";
 import App from "./App";
-import moment from "moment";
+
+// removes logs in production
+if (process.env.NODE_ENV === "production") {
+  console.log = () => {};
+  console.error = () => {};
+  console.debug = () => {};
+}
 
 function TodoList() {
   return (
-    <Provider store={store}>
-      <LocalizationProvider
-        dateAdapter={DateAdapter}
-        locale={moment.locale("en-ca")}
-      >
-        <App />
-      </LocalizationProvider>
-    </Provider>
+    <BrowserRouter>
+      <Provider store={store}>
+        <LocalizationProvider
+          dateAdapter={DateAdapter}
+          locale={moment.locale("en-ca")}
+        >
+          <App />
+        </LocalizationProvider>
+      </Provider>
+    </BrowserRouter>
   );
 }
 
