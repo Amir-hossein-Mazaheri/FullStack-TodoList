@@ -4,7 +4,6 @@ import Swal from "sweetalert2";
 import withReactContent from "sweetalert2-react-content";
 import { useSelector, useDispatch } from "react-redux";
 import Button from "@mui/material/Button";
-import SaveIcon from "@mui/icons-material/SaveAs";
 import AddIcon from "@mui/icons-material/AddCircle";
 import HelpIcon from "@mui/icons-material/Help";
 import EditIcon from "@mui/icons-material/Edit";
@@ -18,9 +17,9 @@ const Message = withReactContent(Swal);
 
 function AddTodoPage() {
   const [isAddingTodo, setIsAddingTodo] = useState(false);
-  const [isSavingAll, setIsSavingAll] = useState(false);
-  const { todo, todoTypeId, isTodoSaved, generatedTodoId, subTodos } =
-    useSelector((store) => store.entities.addTodo);
+  const { todo, todoTypeId, isTodoSaved, generatedTodoId } = useSelector(
+    (store) => store.entities.addTodo
+  );
 
   const dispatch = useDispatch();
 
@@ -30,95 +29,65 @@ function AddTodoPage() {
       description: todo.description,
       deadline: todo.deadline,
       is_finished_before_deadline: false,
-      status: "U",
+      status: "D",
       is_removed: false,
       todo_type: todoTypeId,
     };
   }, [todo.deadline, todo.description, todo.title, todoTypeId]);
 
-  const saveTodo = useCallback(() => {
-    setIsAddingTodo(true);
-    axiosInstance
-      .post("/todos/", todoDetails)
-      .then((res) => {
-        console.log(res.data);
-        Message.fire({
-          title: "Todo Saved",
-          text: "Now you can add and save sub todo",
-          icon: "success",
-        });
-        const todoId = res.data.id;
-        dispatch(SAVE_TODO({ id: todoId }));
-      })
-      .catch((err) => {
-        Message.fire({
-          title: "A Problem Happened",
-          text: "Try saving again",
-          icon: "error",
-        });
-        console.log(err.response);
-      })
-      .finally(() => setIsAddingTodo(false));
-  }, [dispatch, todoDetails]);
-
-  const editTodo = useCallback(() => {
-    setIsAddingTodo(true);
-    axiosInstance
-      .patch(`/todos/${generatedTodoId}/`, todoDetails)
-      .then((res) => {
-        console.log(res.data);
-        Message.fire({
-          title: "Todo Edited",
-          icon: "success",
-        });
-      })
-      .catch((err) => {
-        console.log(err);
-        console.log(err.response);
-        Message.fire({
-          title: "A Problem Happened",
-          icon: "error",
-        });
-      })
-      .finally(() => setIsAddingTodo(false));
-  }, [generatedTodoId, todoDetails]);
-
-  const handleTodoSubmission = useCallback(
+  const saveTodo = useCallback(
     (event) => {
       event.preventDefault();
-      const subTodosDbIds = subTodos
-        .map((subTodo) => subTodo.dbId)
-        .filter((dbId) => dbId !== null);
-
-      const todoItem = {
-        todo: generatedTodoId,
-        sub_todos: subTodosDbIds,
-        todo_type: todoTypeId,
-      };
-
-      setIsSavingAll(true);
-
+      setIsAddingTodo(true);
       axiosInstance
-        .post(`/todo-item/`, todoItem)
+        .post("/todos/", todoDetails)
         .then((res) => {
-          console.log(res);
+          console.log(res.data);
           Message.fire({
-            titleText: "Todo Added Completely",
+            title: "Todo Saved",
+            text: "Now you can add and save sub todo",
             icon: "success",
           });
-          dispatch(RESET_ADD_TODO());
+          const todoId = res.data.id;
+          dispatch(SAVE_TODO({ id: todoId }));
+        })
+        .catch((err) => {
+          Message.fire({
+            title: "A Problem Happened",
+            text: "Try saving again",
+            icon: "error",
+          });
+          console.log(err.response);
+        })
+        .finally(() => setIsAddingTodo(false));
+    },
+    [dispatch, todoDetails]
+  );
+
+  const editTodo = useCallback(
+    (event) => {
+      event.preventDefault();
+      setIsAddingTodo(true);
+      axiosInstance
+        .patch(`/todos/${generatedTodoId}/`, todoDetails)
+        .then((res) => {
+          console.log(res.data);
+          Message.fire({
+            title: "Todo Edited",
+            icon: "success",
+          });
         })
         .catch((err) => {
           console.log(err);
           console.log(err.response);
           Message.fire({
-            titleText: "A Problem Happened On Saving",
+            title: "A Problem Happened",
             icon: "error",
           });
         })
-        .finally(() => setIsSavingAll(false));
+        .finally(() => setIsAddingTodo(false));
     },
-    [dispatch, generatedTodoId, subTodos, todoTypeId]
+    [generatedTodoId, todoDetails]
   );
 
   return (
@@ -139,7 +108,7 @@ function AddTodoPage() {
         </div>
 
         <div>
-          <form onSubmit={handleTodoSubmission}>
+          <form onSubmit={!isTodoSaved ? saveTodo : editTodo}>
             <AddTodoProperties />
 
             <div className="my-7">
@@ -152,37 +121,13 @@ function AddTodoPage() {
                   <div className="px-5 py-2 mt-5 relative w-fit">
                     <Spinner className="p-2" />
                   </div>
-                ) : !isTodoSaved ? (
-                  <Button
-                    onClick={saveTodo}
-                    startIcon={<AddIcon />}
-                    variant="outlined"
-                  >
-                    Save Todo
-                  </Button>
                 ) : (
                   <Button
-                    onClick={editTodo}
-                    startIcon={<EditIcon />}
+                    startIcon={!isTodoSaved ? <AddIcon /> : <EditIcon />}
                     variant="outlined"
-                  >
-                    Edit Todo
-                  </Button>
-                )}
-              </div>
-              <div>
-                {isSavingAll ? (
-                  <div className="px-5 py-2 mt-5 relative w-fit">
-                    <Spinner className="p-2" />
-                  </div>
-                ) : (
-                  <Button
                     type="submit"
-                    startIcon={<SaveIcon />}
-                    color="success"
-                    variant="outlined"
                   >
-                    <span className="font-medium">Save All</span>
+                    {!isTodoSaved ? <p>Save Todo</p> : <p>Edit Todo</p>}
                   </Button>
                 )}
               </div>
