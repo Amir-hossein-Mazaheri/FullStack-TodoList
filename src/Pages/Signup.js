@@ -68,6 +68,7 @@ function SignUpPage() {
           navigate("/sign-in");
         })
         .catch((err) => {
+          setIsSigningUp(false);
           console.log(err);
           console.log(err.response);
           if (err.response && err.response.status === 400) {
@@ -83,8 +84,7 @@ function SignUpPage() {
             titleText: "A Problem Happened",
             icon: "error",
           });
-        })
-        .finally(() => setIsSigningUp(false));
+        });
     },
     [navigate]
   );

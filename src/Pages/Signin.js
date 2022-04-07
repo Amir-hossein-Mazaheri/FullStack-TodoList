@@ -44,6 +44,7 @@ function SignInPage() {
           });
         })
         .catch((err) => {
+          setIsSigningIn(false);
           console.log(err);
           console.log(err.response);
           if (err.response && err.response.status === 401) {
@@ -57,8 +58,7 @@ function SignInPage() {
             titleText: "A problem happened",
             icon: "error",
           });
-        })
-        .finally(() => setIsSigningIn(false));
+        });
     },
     [navigate, password, username]
   );
