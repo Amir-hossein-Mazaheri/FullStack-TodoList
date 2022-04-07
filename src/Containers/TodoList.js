@@ -1,7 +1,9 @@
 import { Provider } from "react-redux";
+import { BrowserRouter } from "react-router-dom";
+import { QueryClientProvider, QueryClient } from "react-query";
+import { ReactQueryDevtools } from "react-query/devtools";
 import LocalizationProvider from "@mui/lab/LocalizationProvider";
 import DateAdapter from "@mui/lab/AdapterMoment";
-import { BrowserRouter } from "react-router-dom";
 import "moment/locale/en-ca";
 import moment from "moment";
 import store from "../Store/configStore";
@@ -14,18 +16,23 @@ if (process.env.NODE_ENV === "production") {
   console.debug = () => {};
 }
 
+const queryClient = new QueryClient();
+
 function TodoList() {
   return (
-    <BrowserRouter>
+    <QueryClientProvider client={queryClient}>
       <Provider store={store}>
-        <LocalizationProvider
-          dateAdapter={DateAdapter}
-          locale={moment.locale("en-ca")}
-        >
-          <App />
-        </LocalizationProvider>
+        <BrowserRouter>
+          <LocalizationProvider
+            dateAdapter={DateAdapter}
+            locale={moment.locale("en-ca")}
+          >
+            <App />
+          </LocalizationProvider>
+        </BrowserRouter>
       </Provider>
-    </BrowserRouter>
+      <ReactQueryDevtools initialIsOpen={false} />
+    </QueryClientProvider>
   );
 }
 
