@@ -1,9 +1,7 @@
 import { useCallback, useState, useMemo } from "react";
 
 import { useDispatch, useSelector } from "react-redux";
-import TextField from "@mui/material/TextField";
-import Button from "@mui/material/Button";
-import Progress from "@mui/material/CircularProgress";
+import { TextField, Button, CircularProgress as Progress } from "@mui/material";
 import DeleteIcon from "@mui/icons-material/Delete";
 import SaveIcon from "@mui/icons-material/Save";
 import EditIcon from "@mui/icons-material/Edit";
