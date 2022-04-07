@@ -52,8 +52,8 @@ function Navbar() {
 
   useEffect(() => {
     const isLoggedIn = Auth.isLoggedIn();
-    const isRefreshExpired = Auth.isTokenExpired(Auth.getToken("refresh"));
-    if (!isLoggedIn || isRefreshExpired) {
+    console.log(isLoggedIn);
+    if (!isLoggedIn) {
       navigate("/sign-in");
       return;
     }
