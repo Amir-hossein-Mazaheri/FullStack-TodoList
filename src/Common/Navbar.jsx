@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
 
-import useSWR from "swr";
+import { useQuery } from "react-query";
 import { Link, NavLink, useNavigate } from "react-router-dom";
 import AppBar from "@mui/material/AppBar";
 import Box from "@mui/material/Box";
@@ -18,6 +18,7 @@ import axiosAuth from "../Helpers/axiosAuth";
 import Auth from "../Helpers/Auth";
 import { useDispatch } from "react-redux";
 import { SET_USER_DETAIL } from "../Store/entities/user";
+import { Alert } from "../Helpers/message";
 
 const pages = [
   {
@@ -79,25 +80,34 @@ function Navbar() {
 
   const dispatch = useDispatch();
 
-  const profileFetcher = useCallback(
-    (url) =>
-      axiosAuth(url, {
-        headers: {
-          Authorization: "Auth " + Auth.getToken("access"),
-        },
-      })
-        .then((res) => {
-          console.log(res);
-          dispatch(SET_USER_DETAIL({ details: res.data }));
-          return res.data;
-        })
-        .catch((err) => console.log(err.response)),
-    [dispatch]
-  );
+  const profileFetcher = useCallback(async () => {
+    const { data } = await axiosAuth.get("/users/me/", {
+      headers: { Authorization: "Auth " + Auth.getToken("access") },
+    });
 
-  const { data: userData } = useSWR("/users/me/", profileFetcher);
+    console.log(data);
 
-  if (!userData) {
+    dispatch(SET_USER_DETAIL({ details: data }));
+
+    return data;
+  }, [dispatch]);
+
+  const {
+    data: user,
+    isLoading: isUserLoading,
+    isError,
+    error,
+  } = useQuery(["current-user"], () => profileFetcher());
+
+  if (isUserLoading) {
+    return <></>;
+  }
+
+  if (isError) {
+    Alert.fire({
+      titleText: error,
+      icon: "error",
+    });
     return <></>;
   }
 
@@ -184,7 +194,7 @@ function Navbar() {
                 sx={{ p: 0 }}
               >
                 <Avatar
-                  alt={userData.first_name + " " + userData.last_name}
+                  alt={user.first_name + " " + user.last_name}
                   src="/static/images/avatar/2.jpg"
                 />
               </IconButton>

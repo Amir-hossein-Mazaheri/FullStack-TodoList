@@ -1,8 +1,9 @@
 import { Autocomplete, TextField } from "@mui/material";
 import DateTimePicker from "@mui/lab/MobileDatePicker";
-import useSWR from "swr";
+import { useQuery } from "react-query";
 import { SET_TODO_PROPERTY, SET_TODO_TYPE } from "../Store/entities/addTodo";
 import { useDispatch, useSelector } from "react-redux";
+import { Alert } from "../Helpers/message";
 import fetcher from "../Helpers/fetcher";
 import Spinner from "../Common/Spinner";
 
@@ -10,10 +11,23 @@ function AddTodoProperties() {
   const dispatch = useDispatch();
   const { todo } = useSelector((store) => store.entities.addTodo);
 
-  const { data: todoTypes } = useSWR("todo-type/", fetcher);
+  const {
+    data: todoTypes,
+    isLoading,
+    isError,
+    error,
+  } = useQuery(["todo-type"], () => fetcher("todo-type/"));
 
-  if (!todoTypes) {
+  if (isLoading) {
     return <Spinner />;
+  }
+
+  if (isError) {
+    Alert.fire({
+      titleText: error,
+      icon: "error",
+    });
+    return <></>;
   }
 
   return (
