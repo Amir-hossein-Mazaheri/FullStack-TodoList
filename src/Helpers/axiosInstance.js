@@ -14,11 +14,14 @@ axiosInstance.interceptors.response.use(
   async (err) => {
     const config = err.config;
     if (err.response.status === 401) {
-      console.log("refreshing access!");
-      const access = await Auth.checkLogin();
-      // localStorage.setItem("access", access);
-      Auth.setAccessToken(access);
-      config.headers["Authorization"] = "Auth " + access;
+      try {
+        const access = await Auth.getNewAccessToken();
+        Auth.setAccessToken(access);
+        config.headers["Authorization"] = "Auth " + access;
+      } catch (err) {
+        console.log(err);
+        console.log(err.response);
+      }
       return axiosInstance(config);
     }
 
