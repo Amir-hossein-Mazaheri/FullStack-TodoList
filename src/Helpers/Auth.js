@@ -2,23 +2,6 @@ import { decodeJwt as decode } from "jose";
 import axiosAuth from "./axiosAuth";
 
 class Auth {
-  async checkLogin() {
-    const access = this.getToken("access");
-    const refresh = this.getToken("refresh");
-    if (this.isTokenExpired(access)) {
-      if (this.isTokenExpired(refresh)) {
-        return null;
-      } else {
-        const newAccess = await this.getNewAccessToken(refresh);
-        return newAccess;
-      }
-    } else {
-      return access;
-    }
-  }
-  checkHasConfirmed() {
-    return decode(localStorage.getItem("access")).has_confirmed;
-  }
   async getNewAccessToken() {
     console.log("Refreshing Access Token");
     try {
@@ -26,21 +9,22 @@ class Auth {
         refresh: this.getToken("refresh"),
       });
       console.log(data);
+
       this.setAccessToken(data.access);
+
       return data.access;
-    } catch (e) {
-      console.log(e);
+    } catch (err) {
+      console.log(err);
+      console.log(err.response);
     }
   }
 
   isTokenExpired(token) {
     if (token === "" || !token) return true;
-    try {
-      const decoded = decode(token);
-      return decoded.exp ? decoded.exp < Date.now() / 1000 : false;
-    } catch (err) {
-      return false;
-    }
+    const decodedToken = decode(token);
+    const tokenExpiration = decodedToken.exp; // return Unix timestamp in seconds not in milliseconds
+
+    return Date.now() / 1000 > tokenExpiration; // returns true if token expiration is before now
   }
 
   getToken(key) {
@@ -55,23 +39,29 @@ class Auth {
   }
 
   isLoggedIn() {
-    const access = this.getToken("access");
-    if (access) {
-      return true;
-    }
-    return false;
+    const accessToken = this.getToken("access");
+    const refreshToken = this.getToken("refresh");
+
+    const isRefreshExpired = this.isTokenExpired(refreshToken);
+
+    console.log("access token : ", accessToken);
+    console.log("refresh token : ", refreshToken);
+
+    console.log(isRefreshExpired);
+
+    return accessToken && refreshToken && !isRefreshExpired; // returns boolean
   }
 
-  setRefreshToken(ref) {
-    localStorage.setItem("refresh", ref);
+  setRefreshToken(refreshToken) {
+    localStorage.setItem("refresh", refreshToken);
   }
-  setAccessToken(acc) {
-    localStorage.setItem("access", acc);
+  setAccessToken(accessToken) {
+    localStorage.setItem("access", accessToken);
   }
+
   logout() {
     localStorage.removeItem("access");
     localStorage.removeItem("refresh");
-    // window.location.reload();
   }
 }
 
